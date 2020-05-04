@@ -5,7 +5,6 @@ import csv
 import os
 
 class HandDetector():
-
     def __init__(self, palm_model, anchors_path):
         self.interpreter = tf.lite.Interpreter(model_path = palm_model)
         self.interpreter.allocate_tensors()
@@ -101,7 +100,6 @@ if __name__ == '__main__':
     capture = cv2.VideoCapture(0)
 
     while True:
-
         ret, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
