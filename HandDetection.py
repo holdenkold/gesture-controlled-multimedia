@@ -51,7 +51,20 @@ class HandDetector():
         side = side_multiplier * max_side
         x = center[0] - side/2
         y = center[1] - side/2
-        return (x, y, side, side)
+        return (int(x), int(y), int(side), int(side))
+
+    @staticmethod
+    def getHandImage(image, keypoints, x, y, w, h, outsize = 128):
+        if x <0 or y <0:
+            return (None, None)
+        begin = np.array([x,y])
+        newKeypoints = keypoints - begin
+        newKeypoints[:, 0] *= outsize/w
+        newKeypoints[:, 1] *= outsize/h
+        newKeypoints = newKeypoints.astype(int)
+        crop = image[y:y+h, x:x+w]
+        handImage = cv2.resize(crop, (outsize, outsize))
+        return (handImage, newKeypoints)
 
 
     def __call__(self, image):
@@ -71,8 +84,7 @@ class HandDetector():
 
         candidate_anchors = self.anchors[detecion_mask]
 
-        if candidate_detect.shape[0] != 0:
-
+        if candidate_detect.shape[0] != 0: 
             max_idx = np.argmax(candidate_detect[:, 3])
 
             dx,dy,w,h = candidate_detect[max_idx, :4]
@@ -82,37 +94,30 @@ class HandDetector():
             
             center = self.getCenter(keypoints)
 
-            (res_kp, res_cnt) = self.resizeOriginal(keypoints, center, frame.shape[1], frame.shape[0])
-
+            (res_kp, res_cnt) = self.resizeOriginal(keypoints, center, image.shape[1], image.shape[0])
             return (res_kp, res_cnt)
-        else:
-            return (None, None)
-        
+        return (None, None)
+
 if __name__ == '__main__':
     curr_dir = os.getcwd()
-    print(curr_dir)
-
     palm_model_path = curr_dir + "/models/palm_detection.tflite"
     anchors_path = curr_dir + "/models/anchors.csv"
 
     detector = HandDetector(palm_model_path, anchors_path)
-
     capture = cv2.VideoCapture(0)
 
     while True:
         ret, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         keypoints, center = detector(image)
 
         if keypoints is not None:
-            for c in keypoints:
-                frame = cv2.circle(frame, (int(c[0]),int(c[1])),5, (0, 0, 255))
-
+            for x, y in keypoints:
+                x, y = int(x), int(y)
+                frame = cv2.circle(frame, (x, y), 5, (0, 0, 255))
             frame = cv2.circle(frame, (int(center[0]),int(center[1])),5, (255, 0, 255))
-
-            (x, y, w, h) = detector.getBBox(keypoints, center, 3)
-            frame = cv2.rectangle(frame, (int(x), int(y)), (int(x + w), int(y + h)), (0, 255, 0), 2)
+            (x, y, w, h) = detector.getBBox(keypoints, center, 4)
+            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         cv2.imshow('video', frame)
 
