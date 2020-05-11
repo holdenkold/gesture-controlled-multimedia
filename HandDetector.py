@@ -71,7 +71,8 @@ class HandDetector():
 
         candidate_anchors = self.anchors[detecion_mask]
 
-        if candidate_detect.shape[0] != 0: 
+        if candidate_detect.shape[0] != 0:
+
             max_idx = np.argmax(candidate_detect[:, 3])
 
             dx,dy,w,h = candidate_detect[max_idx, :4]
@@ -82,28 +83,10 @@ class HandDetector():
             center = self.getCenter(keypoints)
 
             (res_kp, res_cnt) = self.resizeOriginal(keypoints, center, frame.shape[1], frame.shape[0])
+
             return (res_kp, res_cnt)
-        
-        return (None, None)
-
-
-    def mean_colors_hsv(self, image, keypoints):
-        hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        H,S,V = cv2.split(hsv_image)
-
-        keypoints_ok = [point for point in keypoints 
-                        if point[0] >= 0 and point[0] < image.shape[1] 
-                        and point[1] >= 0 and point[1] < image.shape[0]]
-
-        hh = sorted(H[int(y)][int(x)] for x, y in keypoints_ok)
-        ss = sorted(S[int(y)][int(x)] for x, y in keypoints_ok)
-        vv = sorted(V[int(y)][int(x)] for x, y in keypoints_ok)
-
-        lower = np.array([hh[0], ss[0], vv[0]])
-        upper = np.array([hh[-1], ss[-1], vv[-1]])
-
-        mask = cv2.inRange(hsv_image, lower, upper)
-        return mask
+        else:
+            return (None, None)
         
 if __name__ == '__main__':
     curr_dir = os.getcwd()
@@ -119,25 +102,17 @@ if __name__ == '__main__':
     while True:
         ret, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
-        
+
         keypoints, center = detector(image)
 
         if keypoints is not None:
-            for x, y in keypoints:
-                x, y = int(x), int(y)
-                frame = cv2.circle(frame, (x, y), 5, (0, 0, 255))
+            for c in keypoints:
+                frame = cv2.circle(frame, (int(c[0]),int(c[1])),5, (0, 0, 255))
 
             frame = cv2.circle(frame, (int(center[0]),int(center[1])),5, (255, 0, 255))
+
             (x, y, w, h) = detector.getBBox(keypoints, center, 3)
             frame = cv2.rectangle(frame, (int(x), int(y)), (int(x + w), int(y + h)), (0, 255, 0), 2)
-
-            try:
-                points = np.vstack([keypoints, center])
-                mask = detector.mean_colors_hsv(image, points)
-                frame = cv2.bitwise_and(frame,frame, mask=mask)
-            except Exception as e:
-                print('wrong x,y'+ str(e))
 
         cv2.imshow('video', frame)
 
