@@ -46,8 +46,9 @@ if __name__ == '__main__':
             #extract skin
             handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
             if handImage is not None:
-                cv2.imshow('hand', handImage)
-
+                mask = SkinSegmentation.getSkinMask(handImage, 60)
+                cv2.imshow('hand', mask)
+        
         cv2.imshow('source', source)
 
         #get key code if pressed

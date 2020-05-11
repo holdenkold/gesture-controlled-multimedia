@@ -27,6 +27,13 @@ def getPixelMask(image_hsv, x,y, hd):
     #mask = cv2.erode(mask,kernel,iterations = 2)
     return mask
 
+def getSkinMask(image, thresh):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    mask = cv2.threshold(gray,thresh,255,cv2.THRESH_BINARY)[1]
+    kernel = np.ones((3,3),np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    return mask
+
 def getSkinBackground(image, background, x, y, w, h, outsize = 128):
     if x <0 or y <0:
         return None
