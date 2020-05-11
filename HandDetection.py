@@ -59,7 +59,9 @@ class HandDetector():
             return (None, None)
         begin = np.array([x,y])
         newKeypoints = keypoints - begin
-        newKeypoints = (newKeypoints * (1/outsize)).astype(int)
+        newKeypoints[:, 0] *= outsize/w
+        newKeypoints[:, 1] *= outsize/h
+        newKeypoints = newKeypoints.astype(int)
         crop = image[y:y+h, x:x+w]
         handImage = cv2.resize(crop, (outsize, outsize))
         return (handImage, newKeypoints)
@@ -116,10 +118,6 @@ if __name__ == '__main__':
             frame = cv2.circle(frame, (int(center[0]),int(center[1])),5, (255, 0, 255))
             (x, y, w, h) = detector.getBBox(keypoints, center, 4)
             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-            handImage, newKp = detector.getHandImage(frame, keypoints, x, y, w, h)
-            if handImage is not None:
-                cv2.imshow('hand', handImage)
 
         cv2.imshow('video', frame)
 
