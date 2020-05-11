@@ -51,7 +51,18 @@ class HandDetector():
         side = side_multiplier * max_side
         x = center[0] - side/2
         y = center[1] - side/2
-        return (x, y, side, side)
+        return (int(x), int(y), int(side), int(side))
+
+    @staticmethod
+    def getHandImage(image, keypoints, x, y, w, h, outsize = 128):
+        if x <0 or y <0:
+            return (None, None)
+        begin = np.array([x,y])
+        newKeypoints = keypoints - begin
+        newKeypoints = (newKeypoints * (1/outsize)).astype(int)
+        crop = image[y:y+h, x:x+w]
+        handImage = cv2.resize(crop, (outsize, outsize))
+        return (handImage, newKeypoints)
 
 
     def __call__(self, image):
@@ -102,11 +113,14 @@ if __name__ == '__main__':
             for x, y in keypoints:
                 x, y = int(x), int(y)
                 frame = cv2.circle(frame, (x, y), 5, (0, 0, 255))
-
             frame = cv2.circle(frame, (int(center[0]),int(center[1])),5, (255, 0, 255))
-            (x, y, w, h) = detector.getBBox(keypoints, center, 3)
-            frame = cv2.rectangle(frame, (int(x), int(y)), (int(x + w), int(y + h)), (0, 255, 0), 2)
-    
+            (x, y, w, h) = detector.getBBox(keypoints, center, 4)
+            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            handImage, newKp = detector.getHandImage(frame, keypoints, x, y, w, h)
+            if handImage is not None:
+                cv2.imshow('hand', handImage)
+
         cv2.imshow('video', frame)
 
         if cv2.waitKey(1) == 27:
