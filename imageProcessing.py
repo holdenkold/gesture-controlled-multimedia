@@ -5,6 +5,7 @@ import csv
 import os
 from HandDetection import HandDetector
 import SkinSegmentation
+import GestureRecognition
 
 
 if __name__ == '__main__':
@@ -46,8 +47,11 @@ if __name__ == '__main__':
             #extract skin
             handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
             if handImage is not None:
-                mask = SkinSegmentation.getSkinMask(handImage, 60)
-                cv2.imshow('hand', mask)
+                mask = SkinSegmentation.getSkinMask(handImage, 50)
+                cont = GestureRecognition.getContour(mask)
+                masked = cv2.bitwise_and(handImage,handImage,mask = mask)
+                with_cont = cv2.drawContours(masked, [cont], -1, (0,255,0), 3)
+                cv2.imshow('hand', with_cont)
         
         cv2.imshow('source', source)
 
