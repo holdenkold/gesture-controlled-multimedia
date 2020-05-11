@@ -83,9 +83,7 @@ class HandDetector():
 
             (res_kp, res_cnt) = self.resizeOriginal(keypoints, center, frame.shape[1], frame.shape[0])
             return (res_kp, res_cnt)
-        
         return (None, None)
-
 
     def mean_colors_hsv(self, image, keypoints):
         hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
@@ -133,8 +131,7 @@ if __name__ == '__main__':
                 frame = cv2.bitwise_and(frame,frame, mask=mask)
             except Exception as e:
                 print(e)
-
-
+    
         cv2.imshow('video', frame)
 
         if cv2.waitKey(1) == 27:
