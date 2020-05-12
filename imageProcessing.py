@@ -28,6 +28,10 @@ if __name__ == '__main__':
     cv2.namedWindow('source')
     cv2.createTrackbar('Threshhold','source',60,254,nothing)
 
+    cv2.createTrackbar('Label','source',0,6,nothing)
+
+    photo_counter = 0
+
     while True:
         #get camera feed
         ret, frame = capture.read()
@@ -71,12 +75,14 @@ if __name__ == '__main__':
             background = frame
 
         # Save frame on click
-        if mask is not None and key != -1:
+        if mask is not None and key != -1 and key != 32:
             date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            filename = '{:0>3}_{}.png'.format(key, date_time)
+            lbl = cv2.getTrackbarPos('Label','source')
+            filename = '{}_{}.png'.format(lbl, date_time)
             path = os.path.join(curr_dir, 'dataset', filename)
             cv2.imwrite(path, mask)
-            print("Frame saved! " + path)
+            photo_counter+= 1
+            print(f"Frame saved! nr {photo_counter}" + path)
 
     capture.release()
     cv2.destroyAllWindows()
