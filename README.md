@@ -40,7 +40,9 @@
         ssh ssh.mini.pw.edu.pl
 
 
-- Now you can sync your dataset folder with others:
+- Now you can sync your dataset folder with others 
 
-        rsync -ar --perms --chmod=a+rwx dataset/ ssh.mini.pw.edu.pl:/home/samba/gorzynskik/public_html/obrazki/dataset && \
-        rsync -ar --perms --chmod=a+rwx ssh.mini.pw.edu.pl:/home/samba/gorzynskik/public_html/obrazki/dataset/ dataset/
+        rsync -arO --perms --chmod=a+r dataset/ ssh.mini.pw.edu.pl:/home/samba/gorzynskik/public_html/obrazki/dataset
+
+        (ask for write access)
+        rsync -arO --perms --chmod=a+r ssh.mini.pw.edu.pl:/home/samba/gorzynskik/public_html/obrazki/dataset dataset/
