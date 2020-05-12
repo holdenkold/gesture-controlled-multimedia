@@ -8,6 +8,8 @@ from pathlib import Path
 from HandDetection import HandDetector
 import SkinSegmentation
 
+def nothing(arg):
+    pass
 
 if __name__ == '__main__':
     curr_dir = os.getcwd()
@@ -21,6 +23,10 @@ if __name__ == '__main__':
     capture = cv2.VideoCapture(0)  
 
     hasBackground = False
+
+    cv2.namedWindow('source')
+
+    cv2.createTrackbar('Threshhold','source',60,254,nothing)
 
     while True:
         #get camera feed
@@ -50,7 +56,8 @@ if __name__ == '__main__':
             #extract skin
             handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
             if handImage is not None:
-                mask = SkinSegmentation.getSkinMask(handImage, 60)
+                thresh = cv2.getTrackbarPos('Threshhold','source')
+                mask = SkinSegmentation.getSkinMask(handImage, thresh)
                 cv2.imshow('hand', mask)
         
         cv2.imshow('source', source)
