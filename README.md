@@ -4,6 +4,12 @@
 
 ## Dataset 
 
+### Download link (public)
+
+- https://pages.mini.pw.edu.pl/~gorzynskik/obrazki/
+
+### Contribute with synced directory (MiNI account required)
+
 - Generate rsa keypair (https://serverfault.com/a/330740)
 
     Enter the following command to start generating a rsa keypair:
