@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 import csv
 import os
+from datetime import datetime
+from pathlib import Path
 from HandDetection import HandDetector
 import SkinSegmentation
 
@@ -11,6 +13,7 @@ if __name__ == '__main__':
     curr_dir = os.getcwd()
     palm_model_path = curr_dir + "/models/palm_detection.tflite"
     anchors_path = curr_dir + "/models/anchors.csv"
+    Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
     #load model
     detector = HandDetector(palm_model_path, anchors_path)
@@ -33,6 +36,7 @@ if __name__ == '__main__':
         keypoints, center = detector(image)
 
         source = np.copy(frame)
+        mask = None
 
         if keypoints is not None:
             #visualize detection
@@ -59,6 +63,14 @@ if __name__ == '__main__':
 
         if key == 32: #space
             background = frame
+
+        # Save frame on click
+        if mask is not None and key != -1:
+            date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            filename = '{:0>3}_{}.png'.format(key, date_time)
+            path = os.path.join(curr_dir, 'dataset', filename)
+            cv2.imwrite(path, mask)
+            print("Frame saved! " + path)
 
     capture.release()
     cv2.destroyAllWindows()
