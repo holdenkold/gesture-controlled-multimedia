@@ -21,7 +21,8 @@ if __name__ == '__main__':
     capture = cv2.VideoCapture(0)  
 
     hasBackground = False
-
+    mask = None
+    
     while True:
         #get camera feed
         ret, frame = capture.read()
@@ -36,7 +37,6 @@ if __name__ == '__main__':
         keypoints, center = detector(image)
 
         source = np.copy(frame)
-        mask = None
 
         if keypoints is not None:
             #visualize detection
