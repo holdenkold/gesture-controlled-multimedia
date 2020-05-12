@@ -1,5 +1,7 @@
 # gesture-controlled-multimedia
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/holdenkold/gesture-controlled-multimedia/blob/master/modelTraining.ipynb)
+
 ## Dataset 
 
 - Generate rsa keypair (https://serverfault.com/a/330740)
