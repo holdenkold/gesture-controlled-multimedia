@@ -3,14 +3,19 @@ import numpy as np
 import tensorflow as tf
 import csv
 import os
+from datetime import datetime
+from pathlib import Path
 from HandDetection import HandDetector
 import SkinSegmentation
 
+def nothing(arg):
+    pass
 
 if __name__ == '__main__':
     curr_dir = os.getcwd()
     palm_model_path = curr_dir + "/models/palm_detection.tflite"
     anchors_path = curr_dir + "/models/anchors.csv"
+    Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
     #load model
     detector = HandDetector(palm_model_path, anchors_path)
@@ -18,6 +23,14 @@ if __name__ == '__main__':
     capture = cv2.VideoCapture(0)  
 
     hasBackground = False
+    mask = None
+    
+    cv2.namedWindow('source')
+    cv2.createTrackbar('Threshhold','source',60,254,nothing)
+
+    cv2.createTrackbar('Label','source',0,6,nothing)
+
+    photo_counter = 0
 
     while True:
         #get camera feed
@@ -46,7 +59,8 @@ if __name__ == '__main__':
             #extract skin
             handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
             if handImage is not None:
-                mask = SkinSegmentation.getSkinMask(handImage, 60)
+                thresh = cv2.getTrackbarPos('Threshhold','source')
+                mask = SkinSegmentation.getSkinMask(handImage, thresh)
                 cv2.imshow('hand', mask)
         
         cv2.imshow('source', source)
@@ -59,6 +73,16 @@ if __name__ == '__main__':
 
         if key == 32: #space
             background = frame
+
+        # Save frame on click
+        if mask is not None and key != -1 and key != 32:
+            date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            lbl = cv2.getTrackbarPos('Label','source')
+            filename = '{}_{}.png'.format(lbl, date_time)
+            path = os.path.join(curr_dir, 'dataset', filename)
+            cv2.imwrite(path, mask)
+            photo_counter+= 1
+            print(f"Frame saved! nr {photo_counter}" + path)
 
     capture.release()
     cv2.destroyAllWindows()
