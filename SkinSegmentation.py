@@ -35,11 +35,20 @@ def getSkinMask(image, thresh):
     return mask
 
 def getSkinBackground(image, background, x, y, w, h, outsize = 128):
-    if x <0 or y <0:
-        return None
-    difference = cv2.absdiff(image, background)
+    size = image.shape
+    new_x = x
+    new_y = y
+    temp_image = image
+    temp_background = background
+    if x <0 or y <0 or x + w > size[1] or y + h > size[0]:
+        pad_length = max(-x, -y, (x + w) - size[1], (y + h) - size[0])
+        temp_image = cv2.copyMakeBorder(image, pad_length, pad_length, pad_length,pad_length, cv2.BORDER_CONSTANT, (0, 0, 0))
+        temp_background = cv2.copyMakeBorder(background, pad_length, pad_length, pad_length,pad_length, cv2.BORDER_CONSTANT, (0, 0, 0))
+        new_x = x + pad_length
+        new_y = y + pad_length
+    difference = cv2.absdiff(temp_image, temp_background)
 
-    crop = difference[y:y+h, x:x+w]
+    crop = difference[new_y:new_y+h, new_x:new_x+w]
 
     handImage = cv2.resize(crop, (outsize, outsize))
     return handImage
