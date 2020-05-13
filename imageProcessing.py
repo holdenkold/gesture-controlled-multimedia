@@ -1,8 +1,12 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import cv2
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 import csv
-import os
 from datetime import datetime
 from pathlib import Path
 from HandDetection import HandDetector
@@ -17,8 +21,9 @@ if __name__ == '__main__':
     anchors_path = curr_dir + "/models/anchors.csv"
     Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
-    #load model
+    #load models
     detector = HandDetector(palm_model_path, anchors_path)
+    gesture_model = keras.models.load_model('models/model_v1')
 
     capture = cv2.VideoCapture(0)  
 
@@ -62,6 +67,29 @@ if __name__ == '__main__':
                 thresh = cv2.getTrackbarPos('Threshhold','source')
                 mask = SkinSegmentation.getSkinMask(handImage, thresh)
                 cv2.imshow('hand', mask)
+
+                # Prediction
+                img_shape = (28, 28)
+                mask_norm = mask // 255
+                im = cv2.resize(mask_norm, img_shape)
+                rshp = np.reshape(im, (1, 28, 28, 1))
+                pred = gesture_model.predict(rshp)
+
+                argm = np.argmax(pred[0])
+
+                y0, dy = 50, 20
+                for i, line in enumerate(pred[0]):
+                    y = y0 + i*dy
+                    
+                    maxind = '   '
+                    if i == argm:
+                        maxind = 'MAX'
+
+                    txt = '{} {} {:f}'.format(maxind, i, line)
+                    cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, 4)
+
+                print(pred)
+
         
         cv2.imshow('source', source)
 
