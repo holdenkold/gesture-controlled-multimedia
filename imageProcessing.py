@@ -17,6 +17,9 @@ if __name__ == '__main__':
     anchors_path = curr_dir + "/models/anchors.csv"
     Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
+    # Load the cascade
+    face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
+
     #load model
     detector = HandDetector(palm_model_path, anchors_path)
 
@@ -36,6 +39,7 @@ if __name__ == '__main__':
         #get camera feed
         ret, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         #save background
         if not hasBackground:
@@ -45,23 +49,29 @@ if __name__ == '__main__':
         #detect hand keypoints
         keypoints, center = detector(image)
 
+        #detect the faces
+        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
         source = np.copy(frame)
 
         if keypoints is not None:
-            #visualize detection
-            for x, y in keypoints:
-                x, y = int(x), int(y)
-                source = cv2.circle(source, (x, y), 5, (0, 0, 255))
-            source = cv2.circle(source, (int(center[0]),int(center[1])),5, (255, 0, 255))
+            #get hand box
             (x, y, w, h) = detector.getBBox(keypoints, center, 4)
-            source = cv2.rectangle(source, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            #check if not face
+            if not HandDetector.checkIfFace(x, y, w, h, faces, 0.3):
+                #visualize detection
+                for px, py in keypoints:
+                    px, py = int(px), int(py)
+                    source = cv2.circle(source, (px, py), 5, (0, 0, 255))
+                source = cv2.circle(source, (int(center[0]),int(center[1])),5, (255, 0, 255))
+                source = cv2.rectangle(source, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            #extract skin
-            handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
-            if handImage is not None:
-                thresh = cv2.getTrackbarPos('Threshhold','source')
-                mask = SkinSegmentation.getSkinMask(handImage, thresh)
-                cv2.imshow('hand', mask)
+                #extract skin
+                handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
+                if handImage is not None:
+                    thresh = cv2.getTrackbarPos('Threshhold','source')
+                    mask = SkinSegmentation.getSkinMask(handImage, thresh)
+                    cv2.imshow('hand', mask)
         
         cv2.imshow('source', source)
 
