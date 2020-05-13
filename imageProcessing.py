@@ -18,11 +18,12 @@ import SkinSegmentation
 def nothing(arg):
     pass
 
-def drawtext(img, text, coords, bgracolor=(255,255,255,0)):
+def drawtext(img, osd_list, bgracolor=(255,255,255,0)):
     img_pil = Image.fromarray(img)
     draw = ImageDraw.Draw(img_pil)
     font_text = ImageFont.truetype('/usr/share/fonts/truetype/msttcorefonts/Arial.ttf', 24, encoding="utf-8")
-    draw.text(coords, text, fill=bgracolor, font=font_text)
+    for txt, coords in osd_list:
+        draw.text(coords, txt, fill=bgracolor, font=font_text)
     img = np.array(img_pil)
     return img
 
@@ -42,6 +43,9 @@ if __name__ == '__main__':
     # load Spotify client
     spclient = SpotifyClient()
     me = spclient.me()
+    st = spclient.status()
+    if(st is None):
+        raise ConnectionError("Can't connect to Spotify")
 
     capture = cv2.VideoCapture(0)  
 
@@ -76,6 +80,7 @@ if __name__ == '__main__':
         faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
         source = np.copy(frame)
+        osd = []
 
         if keypoints is not None:
             #get hand box
@@ -101,23 +106,20 @@ if __name__ == '__main__':
                     mask_norm = mask // 255
                     im = cv2.resize(mask_norm, img_shape)
                     rshp = np.reshape(im, (1, 28, 28, 1))
+
+                    # Model output (array of classes probabilities)
                     pred = gesture_model.predict(rshp)
 
-                    argm = np.argmax(pred[0])
+                    # Index of maximum probability
+                    argmax = np.argmax(pred[0])
 
+                    # Display the output
                     y0, dy = 50, 20
                     for i, line in enumerate(pred[0]):
                         y = y0 + i*dy
-                        
-                        maxind = '   '
-                        if i == argm:
-                            maxind = 'MAX'
-
+                        maxind = 'MAX' if i == argmax else '   '
                         txt = '{} {} {:f}'.format(maxind, i, line)
-                        cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                    print(pred)
-
+                        osd.append((txt, (50, y)))
         
         # Apply Spotify info
         name = me['display_name']
@@ -140,10 +142,12 @@ if __name__ == '__main__':
         x_pos = source.shape[1]-450
         y_pos = 50
         dy = 30
-        source = drawtext(source, track_name, (x_pos, y_pos))
-        source = drawtext(source, artist_name, (x_pos, y_pos+dy))
-        source = drawtext(source, "Logged as: "+name, (x_pos, y_pos+2*dy))
 
+        osd.append((track_name, (x_pos, y_pos)))
+        osd.append((artist_name, (x_pos, y_pos+dy)))
+        osd.append(("Logged as: "+name, (x_pos, y_pos+2*dy)))
+
+        source = drawtext(source, osd)
         cv2.imshow('source', source)
 
         #get key code if pressed
