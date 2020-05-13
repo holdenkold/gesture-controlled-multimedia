@@ -21,7 +21,10 @@ if __name__ == '__main__':
     anchors_path = curr_dir + "/models/anchors.csv"
     Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
-    #load models
+    # Load the cascade
+    face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
+
+    #load model
     detector = HandDetector(palm_model_path, anchors_path)
     gesture_model = keras.models.load_model('models/model_v1')
 
@@ -41,6 +44,7 @@ if __name__ == '__main__':
         #get camera feed
         ret, frame = capture.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         #save background
         if not hasBackground:
@@ -50,45 +54,51 @@ if __name__ == '__main__':
         #detect hand keypoints
         keypoints, center = detector(image)
 
+        #detect the faces
+        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
         source = np.copy(frame)
 
         if keypoints is not None:
-            #visualize detection
-            for x, y in keypoints:
-                x, y = int(x), int(y)
-                source = cv2.circle(source, (x, y), 5, (0, 0, 255))
-            source = cv2.circle(source, (int(center[0]),int(center[1])),5, (255, 0, 255))
+            #get hand box
             (x, y, w, h) = detector.getBBox(keypoints, center, 4)
-            source = cv2.rectangle(source, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            #check if not face
+            if not HandDetector.checkIfFace(x, y, w, h, faces, 0.3):
+                #visualize detection
+                for px, py in keypoints:
+                    px, py = int(px), int(py)
+                    source = cv2.circle(source, (px, py), 5, (0, 0, 255))
+                source = cv2.circle(source, (int(center[0]),int(center[1])),5, (255, 0, 255))
+                source = cv2.rectangle(source, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            #extract skin
-            handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
-            if handImage is not None:
-                thresh = cv2.getTrackbarPos('Threshhold','source')
-                mask = SkinSegmentation.getSkinMask(handImage, thresh)
-                cv2.imshow('hand', mask)
+                #extract skin
+                handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
+                if handImage is not None:
+                    thresh = cv2.getTrackbarPos('Threshhold','source')
+                    mask = SkinSegmentation.getSkinMask(handImage, thresh)
+                    cv2.imshow('hand', mask)
 
-                # Prediction
-                img_shape = (28, 28)
-                mask_norm = mask // 255
-                im = cv2.resize(mask_norm, img_shape)
-                rshp = np.reshape(im, (1, 28, 28, 1))
-                pred = gesture_model.predict(rshp)
+                    # Prediction
+                    img_shape = (28, 28)
+                    mask_norm = mask // 255
+                    im = cv2.resize(mask_norm, img_shape)
+                    rshp = np.reshape(im, (1, 28, 28, 1))
+                    pred = gesture_model.predict(rshp)
 
-                argm = np.argmax(pred[0])
+                    argm = np.argmax(pred[0])
 
-                y0, dy = 50, 20
-                for i, line in enumerate(pred[0]):
-                    y = y0 + i*dy
-                    
-                    maxind = '   '
-                    if i == argm:
-                        maxind = 'MAX'
+                    y0, dy = 50, 20
+                    for i, line in enumerate(pred[0]):
+                        y = y0 + i*dy
+                        
+                        maxind = '   '
+                        if i == argm:
+                            maxind = 'MAX'
 
-                    txt = '{} {} {:f}'.format(maxind, i, line)
-                    cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, 4)
+                        txt = '{} {} {:f}'.format(maxind, i, line)
+                        cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, 4)
 
-                print(pred)
+                    print(pred)
 
         
         cv2.imshow('source', source)
