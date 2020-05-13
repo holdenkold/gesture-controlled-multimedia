@@ -138,3 +138,5 @@ data/
 # Config files
 *.cfg
 .cache*
+
+external models/haarcascade_frontalface_default.xml

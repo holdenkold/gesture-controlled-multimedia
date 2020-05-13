@@ -66,6 +66,20 @@ class HandDetector():
         handImage = cv2.resize(crop, (outsize, outsize))
         return (handImage, newKeypoints)
 
+    @staticmethod
+    def checkIfFace(x, y, w, h, faces, perc_of_cover):
+        area_hand = w * h
+        for (xf, yf, wf, hf) in faces:
+            dx = min(x + w, xf + wf) - max(x, xf)
+            dy = min(y + h, yf + hf) - max(y, yf)
+            if (dx>=0) and (dy>=0):
+                area_inter = dx * dy
+                area_hand = wf * hf
+                perc = area_inter/area_hand
+                if perc > perc_of_cover or abs(area_hand - area_inter) < 10:
+                    return True
+        return False
+
 
     def __call__(self, image):
         preProcessed = self.preProcessImage(image)
