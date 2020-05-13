@@ -71,34 +71,34 @@ if __name__ == '__main__':
                 source = cv2.circle(source, (int(center[0]),int(center[1])),5, (255, 0, 255))
                 source = cv2.rectangle(source, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            #extract skin
-            handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
-            if handImage is not None:
-                thresh = cv2.getTrackbarPos('Threshhold','source')
-                mask = SkinSegmentation.getSkinMask(handImage, thresh)
-                cv2.imshow('hand', mask)
+                #extract skin
+                handImage = SkinSegmentation.getSkinBackground(frame, background, x, y, w, h, 256)
+                if handImage is not None:
+                    thresh = cv2.getTrackbarPos('Threshhold','source')
+                    mask = SkinSegmentation.getSkinMask(handImage, thresh)
+                    cv2.imshow('hand', mask)
 
-                # Prediction
-                img_shape = (28, 28)
-                mask_norm = mask // 255
-                im = cv2.resize(mask_norm, img_shape)
-                rshp = np.reshape(im, (1, 28, 28, 1))
-                pred = gesture_model.predict(rshp)
+                    # Prediction
+                    img_shape = (28, 28)
+                    mask_norm = mask // 255
+                    im = cv2.resize(mask_norm, img_shape)
+                    rshp = np.reshape(im, (1, 28, 28, 1))
+                    pred = gesture_model.predict(rshp)
 
-                argm = np.argmax(pred[0])
+                    argm = np.argmax(pred[0])
 
-                y0, dy = 50, 20
-                for i, line in enumerate(pred[0]):
-                    y = y0 + i*dy
-                    
-                    maxind = '   '
-                    if i == argm:
-                        maxind = 'MAX'
+                    y0, dy = 50, 20
+                    for i, line in enumerate(pred[0]):
+                        y = y0 + i*dy
+                        
+                        maxind = '   '
+                        if i == argm:
+                            maxind = 'MAX'
 
-                    txt = '{} {} {:f}'.format(maxind, i, line)
-                    cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, 4)
+                        txt = '{} {} {:f}'.format(maxind, i, line)
+                        cv2.putText(source, txt, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 1, 4)
 
-                print(pred)
+                    print(pred)
 
         
         cv2.imshow('source', source)
