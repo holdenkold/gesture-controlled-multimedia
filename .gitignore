@@ -134,3 +134,4 @@ dmypy.json
 *.DS_Store
 dataset*
 data/
+external models/haarcascade_frontalface_default.xml
