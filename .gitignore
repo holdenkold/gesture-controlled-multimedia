@@ -134,3 +134,6 @@ dmypy.json
 *.DS_Store
 dataset*
 data/
+
+# Config files
+*.cfg
