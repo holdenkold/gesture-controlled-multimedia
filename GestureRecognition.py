@@ -15,7 +15,7 @@ class GestureAccepter():
         for i in range(len(gesture)):
             self.stats[i]+= gesture[i]
 
-        if len(self.last_gestures) == self.capacity:
+        if len(self.last_gestures) >= self.capacity:
             return self.accept_gesture()
 
     def accept_gesture(self):
