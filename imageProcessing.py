@@ -17,6 +17,7 @@ import SkinSegmentation
 
 SHOW_SPOTIFY_INFO = False
 CREATE_DATA_SET = False
+SHOW_MODEL_PREDICTIONS = True
 
 def nothing(arg):
     pass
@@ -118,12 +119,13 @@ if __name__ == '__main__':
                     argmax = np.argmax(pred[0])
 
                     # Display the output
-                    y0, dy = 50, 20
-                    for i, line in enumerate(pred[0]):
-                        y = y0 + i*dy
-                        maxind = 'MAX' if i == argmax else '   '
-                        txt = '{} {} {:f}'.format(maxind, i, line)
-                        osd.append((txt, (50, y)))
+                    if SHOW_MODEL_PREDICTIONS:
+                        y0, dy = 50, 20
+                        for i, line in enumerate(pred[0]):
+                            y = y0 + i*dy
+                            maxind = 'MAX' if i == argmax else '   '
+                            txt = '{} {} {:f}'.format(maxind, i, line)
+                            osd.append((txt, (50, y)))
         
         # Apply Spotify info
         if (SHOW_SPOTIFY_INFO):
