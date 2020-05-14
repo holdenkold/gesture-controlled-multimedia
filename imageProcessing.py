@@ -21,7 +21,7 @@ def nothing(arg):
 def drawtext(img, osd_list, bgracolor=(255,255,255,0)):
     img_pil = Image.fromarray(img)
     draw = ImageDraw.Draw(img_pil)
-    font_text = ImageFont.truetype('/usr/share/fonts/truetype/msttcorefonts/Arial.ttf', 24, encoding="utf-8")
+    font_text = ImageFont.truetype('Arial.ttf', 24, encoding="utf-8")
     for txt, coords in osd_list:
         draw.text(coords, txt, fill=bgracolor, font=font_text)
     img = np.array(img_pil)
