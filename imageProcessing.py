@@ -125,7 +125,7 @@ if __name__ == '__main__':
                     recognised_gesture = gesture_accepter.recognise_gesture(pred[0])
 
                     if recognised_gesture is not None:
-                        osd.append((recognised_gesture, (400, 100)))
+                        osd.append((recognised_gesture, (450, 50)))
 
 
                     # Index of maximum probability
