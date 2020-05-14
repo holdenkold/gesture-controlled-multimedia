@@ -16,6 +16,8 @@ from spotifyIntegration import SpotifyClient
 import SkinSegmentation
 
 SHOW_SPOTIFY_INFO = False
+CREATE_DATA_SET = False
+SHOW_MODEL_PREDICTIONS = True
 
 def nothing(arg):
     pass
@@ -33,7 +35,6 @@ if __name__ == '__main__':
     curr_dir = os.getcwd()
     palm_model_path = curr_dir + "/models/palm_detection.tflite"
     anchors_path = curr_dir + "/models/anchors.csv"
-    Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
     # Load the cascade
     face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
@@ -56,8 +57,10 @@ if __name__ == '__main__':
     
     cv2.namedWindow('source')
     cv2.createTrackbar('Threshhold','source',60,254,nothing)
-
-    cv2.createTrackbar('Label','source',0,6,nothing)
+    
+    if CREATE_DATA_SET:
+        cv2.createTrackbar('Label','source',0,6,nothing)
+        Path(curr_dir, 'dataset').mkdir(exist_ok=True)
 
     photo_counter = 0
 
@@ -116,12 +119,13 @@ if __name__ == '__main__':
                     argmax = np.argmax(pred[0])
 
                     # Display the output
-                    y0, dy = 50, 20
-                    for i, line in enumerate(pred[0]):
-                        y = y0 + i*dy
-                        maxind = 'MAX' if i == argmax else '   '
-                        txt = '{} {} {:f}'.format(maxind, i, line)
-                        osd.append((txt, (50, y)))
+                    if SHOW_MODEL_PREDICTIONS:
+                        y0, dy = 50, 20
+                        for i, line in enumerate(pred[0]):
+                            y = y0 + i*dy
+                            maxind = 'MAX' if i == argmax else '   '
+                            txt = '{} {} {:f}'.format(maxind, i, line)
+                            osd.append((txt, (50, y)))
         
         # Apply Spotify info
         if (SHOW_SPOTIFY_INFO):
@@ -163,7 +167,7 @@ if __name__ == '__main__':
             background = frame
 
         # Save frame on click
-        if mask is not None and key != -1 and key != 32:
+        if CREATE_DATA_SET and mask is not None and key != -1 and key != 32:
             date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             lbl = cv2.getTrackbarPos('Label','source')
             filename = '{}_{}.png'.format(lbl, date_time)
