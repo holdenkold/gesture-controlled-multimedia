@@ -14,8 +14,10 @@ from pathlib import Path
 from HandDetection import HandDetector
 from spotifyIntegration import SpotifyClient
 import SkinSegmentation
+from GestureRecognition import GestureAccepter
 
 SHOW_SPOTIFY_INFO = False
+CONNECT_TO_SPOTIFY = False
 CREATE_DATA_SET = False
 SHOW_MODEL_PREDICTIONS = True
 
@@ -25,6 +27,7 @@ def nothing(arg):
 def drawtext(img, osd_list, bgracolor=(255,255,255,0)):
     img_pil = Image.fromarray(img)
     draw = ImageDraw.Draw(img_pil)
+    
     font_text = ImageFont.truetype('Arial.ttf', 24, encoding="utf-8")
     for txt, coords in osd_list:
         draw.text(coords, txt, fill=bgracolor, font=font_text)
@@ -43,12 +46,16 @@ if __name__ == '__main__':
     detector = HandDetector(palm_model_path, anchors_path)
     gesture_model = keras.models.load_model('models/model_v1')
 
+    #load GestureAccepter
+    gesture_accepter = GestureAccepter(5, 15)
+
     # load Spotify client
-    spclient = SpotifyClient()
-    me = spclient.me()
-    st = spclient.status()
-    if(st is None):
-        raise ConnectionError("Can't connect to Spotify")
+    if CONNECT_TO_SPOTIFY:
+        spclient = SpotifyClient()
+        me = spclient.me()
+        st = spclient.status()
+        if(st is None):
+            raise ConnectionError("Can't connect to Spotify")
 
     capture = cv2.VideoCapture(0)  
 
@@ -115,6 +122,12 @@ if __name__ == '__main__':
                     # Model output (array of classes probabilities)
                     pred = gesture_model.predict(rshp)
 
+                    recognised_gesture = gesture_accepter.recognise_gesture(pred[0])
+
+                    if recognised_gesture is not None:
+                        osd.append((recognised_gesture, (450, 50)))
+
+
                     # Index of maximum probability
                     argmax = np.argmax(pred[0])
 
@@ -128,7 +141,7 @@ if __name__ == '__main__':
                             osd.append((txt, (50, y)))
         
         # Apply Spotify info
-        if (SHOW_SPOTIFY_INFO):
+        if (CONNECT_TO_SPOTIFY and SHOW_SPOTIFY_INFO):
             name = me['display_name']
             st = spclient.status()
             playing = st['is_playing']
