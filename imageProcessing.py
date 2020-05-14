@@ -17,6 +17,7 @@ import SkinSegmentation
 from GestureRecognition import GestureAccepter
 
 SHOW_SPOTIFY_INFO = False
+CONNECT_TO_SPOTIFY = False
 CREATE_DATA_SET = False
 SHOW_MODEL_PREDICTIONS = True
 
@@ -46,14 +47,15 @@ if __name__ == '__main__':
     gesture_model = keras.models.load_model('models/model_v1')
 
     #load GestureAccepter
-    gesture_accepter = GestureAccepter(20, 5)
+    gesture_accepter = GestureAccepter(5, 15)
 
     # load Spotify client
-    spclient = SpotifyClient()
-    me = spclient.me()
-    st = spclient.status()
-    if(st is None):
-        raise ConnectionError("Can't connect to Spotify")
+    if CONNECT_TO_SPOTIFY:
+        spclient = SpotifyClient()
+        me = spclient.me()
+        st = spclient.status()
+        if(st is None):
+            raise ConnectionError("Can't connect to Spotify")
 
     capture = cv2.VideoCapture(0)  
 
@@ -139,7 +141,7 @@ if __name__ == '__main__':
                             osd.append((txt, (50, y)))
         
         # Apply Spotify info
-        if (SHOW_SPOTIFY_INFO):
+        if (CONNECT_TO_SPOTIFY and SHOW_SPOTIFY_INFO):
             name = me['display_name']
             st = spclient.status()
             playing = st['is_playing']
