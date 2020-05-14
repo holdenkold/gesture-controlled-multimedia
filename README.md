@@ -2,6 +2,24 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/holdenkold/gesture-controlled-multimedia/blob/master/modelTraining.ipynb)
 
+Gesture Controlled Multimedia is an app allowing to control Spotify by hand gestures.
+
+### Gestures available
+
+- 0 other gesture
+
+- 1 ✋ play / pause
+
+- 2 🤏 mute
+
+- 3 👆previous track
+
+- 4 👌 next track
+
+- 5 ✌️ volume up
+
+- 6 ☝️ volume down
+
 ## Dataset 
 
 ### Download link (public)
