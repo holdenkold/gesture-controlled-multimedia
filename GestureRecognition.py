@@ -30,10 +30,10 @@ class GestureAccepter():
         print(self.gest_map[max_gesture])
         print()
 
-        if max_gesture != 0:
-            self.last_gestures = list()
-            self.stats = [0 for _ in range(7)]
+        self.last_gestures = list()
+        self.stats = [0 for _ in range(7)]
 
+        if max_gesture != 0:
             return self.gest_map[max_gesture]
         
 
