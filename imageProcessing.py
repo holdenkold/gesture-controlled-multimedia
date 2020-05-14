@@ -15,6 +15,8 @@ from HandDetection import HandDetector
 from spotifyIntegration import SpotifyClient
 import SkinSegmentation
 
+SHOW_SPOTIFY_INFO = False
+
 def nothing(arg):
     pass
 
@@ -122,30 +124,31 @@ if __name__ == '__main__':
                         osd.append((txt, (50, y)))
         
         # Apply Spotify info
-        name = me['display_name']
-        st = spclient.status()
-        playing = st['is_playing']
-        track_name = st['item']['name']
-        artist_name = st['item']['artists'][0]['name']
-        album_cover_src_new = st['item']['album']['images'][2]
+        if (SHOW_SPOTIFY_INFO):
+            name = me['display_name']
+            st = spclient.status()
+            playing = st['is_playing']
+            track_name = st['item']['name']
+            artist_name = st['item']['artists'][0]['name']
+            album_cover_src_new = st['item']['album']['images'][2]
 
-        if album_cover_src_new != album_cover_src:
-            album_cover_src = album_cover_src_new
-            album_cover_pil = Image.open(urllib.request.urlopen(album_cover_src['url']))
-            album_cover = np.array(album_cover_pil.convert('RGB'))
+            if album_cover_src_new != album_cover_src:
+                album_cover_src = album_cover_src_new
+                album_cover_pil = Image.open(urllib.request.urlopen(album_cover_src['url']))
+                album_cover = np.array(album_cover_pil.convert('RGB'))
 
-        x_offset=source.shape[1]-50-album_cover.shape[1]
-        y_offset=50
+            x_offset=source.shape[1]-50-album_cover.shape[1]
+            y_offset=50
 
-        source[y_offset:y_offset+album_cover_src['height'], x_offset:x_offset+album_cover_src['width']] = album_cover
+            source[y_offset:y_offset+album_cover_src['height'], x_offset:x_offset+album_cover_src['width']] = album_cover
 
-        x_pos = source.shape[1]-450
-        y_pos = 50
-        dy = 30
+            x_pos = source.shape[1]-450
+            y_pos = 50
+            dy = 30
 
-        osd.append((track_name, (x_pos, y_pos)))
-        osd.append((artist_name, (x_pos, y_pos+dy)))
-        osd.append(("Logged as: "+name, (x_pos, y_pos+2*dy)))
+            osd.append((track_name, (x_pos, y_pos)))
+            osd.append((artist_name, (x_pos, y_pos+dy)))
+            osd.append(("Logged as: "+name, (x_pos, y_pos+2*dy)))
 
         source = drawtext(source, osd)
         cv2.imshow('source', source)
