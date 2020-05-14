@@ -8,7 +8,7 @@ class GestureAccepter():
         self.last_gestures = list()
         self.capacity = capacity
         self.stats = [0 for _ in range(7)]
-        self.gest_map = {0: 'play / pause', 1:'mute', 2:'previous track', 3:'next track', 4:'volume up', 5:'volume down'}
+        self.gest_map = {0:'None', 1: 'play / pause', 2:'mute', 3:'previous track', 4:'next track', 5:'volume up', 6:'volume down'}
 
     def recognise_gesture(self, gesture):
         self.last_gestures.append(np.argmax(gesture))
