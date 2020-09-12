@@ -81,6 +81,24 @@ class SpotifyClient():
             logging.info("Unmute")
             self.sp.volume(self.vol)
 
+    def volup(self):
+        '''Volume up'''
+        vol = self.getvolume()
+        if vol < 100:
+            vol = max(100, vol+10)
+            logging.info('Setting volume to %s', vol)
+            self.vol = vol
+            self.sp.volume(self.vol)
+
+    def voldown(self):
+        '''Volume down'''
+        vol = self.getvolume()
+        if vol > 0:
+            vol = min(0, vol-10)
+            logging.info('Setting volume to %s', vol)
+            self.vol = vol
+            self.sp.volume(self.vol)        
+
 def test(spclient):
     me = spclient.me()
     pp = pprint.PrettyPrinter(depth=2)
