@@ -16,8 +16,8 @@ from spotifyIntegration import SpotifyClient
 import SkinSegmentation
 from GestureRecognition import GestureAccepter
 
-SHOW_SPOTIFY_INFO = False
-CONNECT_TO_SPOTIFY = False
+SHOW_SPOTIFY_INFO = True
+CONNECT_TO_SPOTIFY = True
 CREATE_DATA_SET = False
 SHOW_MODEL_PREDICTIONS = True
 
@@ -46,9 +46,6 @@ if __name__ == '__main__':
     detector = HandDetector(palm_model_path, anchors_path)
     gesture_model = keras.models.load_model('models/model_v1')
 
-    #load GestureAccepter
-    gesture_accepter = GestureAccepter(5, 15)
-
     # load Spotify client
     if CONNECT_TO_SPOTIFY:
         spclient = SpotifyClient()
@@ -56,6 +53,11 @@ if __name__ == '__main__':
         st = spclient.status()
         if(st is None):
             raise ConnectionError("Can't connect to Spotify")
+    else:
+        spclient = None
+
+    #load GestureAccepter
+    gesture_accepter = GestureAccepter(spclient, 5, 15)
 
     capture = cv2.VideoCapture(0)  
 
@@ -157,7 +159,7 @@ if __name__ == '__main__':
             x_offset=source.shape[1]-50-album_cover.shape[1]
             y_offset=50
 
-            source[y_offset:y_offset+album_cover_src['height'], x_offset:x_offset+album_cover_src['width']] = album_cover
+            source[y_offset:y_offset+album_cover.shape[0], x_offset:x_offset+album_cover.shape[1]] = album_cover
 
             x_pos = source.shape[1]-450
             y_pos = 50
