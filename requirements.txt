@@ -67,7 +67,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 PyAutoGUI==0.9.50
 PyGetWindow==0.0.8
-Pygments==2.6.1
+Pygments==2.7.4
 pylint==2.5.2
 PyMsgBox==1.0.7
 pyobjc==6.2
